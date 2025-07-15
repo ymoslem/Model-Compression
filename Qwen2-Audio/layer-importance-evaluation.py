@@ -208,6 +208,8 @@ for i in tqdm(range(total_remove), desc="Downscaling", total=total_remove):
 
     for n in tqdm(required, total=len(required), position=1, desc="Layers eval"):
 
+        print("\nPruning layer", n, "\n")
+
         layers_to_keep = list(full - set(layers_to_remove + [n]))
 
         model = None
@@ -222,14 +224,12 @@ for i in tqdm(range(total_remove), desc="Downscaling", total=total_remove):
         model.language_model.model.layers = nn.ModuleList([lm_layers[n] for n in layers_to_keep])
 
         # Ensure the config reflects the actual number of layers
-        print("\nPruning layer", n, "\n")
-
         model.config.text_config.num_hidden_layers = len(model.language_model.model.layers)
         model.language_model.model.config.num_hidden_layers = len(model.language_model.model.layers)
 
 
         # Check the new number of parameters
-        model_parameters = sum(p.numel() for p in model.parameters())
+        model_parameters = count_parameters(model)
         print(f"Model parameters: {model_parameters:,}")
 
         # Check the new number of layers
