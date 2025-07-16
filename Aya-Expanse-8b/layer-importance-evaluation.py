@@ -61,7 +61,7 @@ dataset = load_dataset(dataset_name,
                        split="test"
                       )
 
-src_lang = "cs"
+src_lang = "cs"  # can be one of {'en', 'cs', 'ja'}
 tgt_lang = "de_DE"  # can be one of {'ar_EG', 'de_DE', 'zh_CN'}
 
 num_rows = 200  # Change if needed
@@ -104,7 +104,7 @@ print(max_len)
 
 def translate(prompts, model):
 
-    batch_size = num_rows  # If memory does not allow, it should be smaller.
+    batch_size = 100  # If memory does not allow, it should be smaller.
     print("Batch Size:" batch_size)
 
     translations = []
