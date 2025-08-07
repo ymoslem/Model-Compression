@@ -105,7 +105,7 @@ print(max_len)
 def translate(prompts, model):
 
     batch_size = 100  # If memory does not allow, it should be smaller.
-    print("Batch Size:" batch_size)
+    print("Batch Size:", batch_size)
 
     translations = []
 
