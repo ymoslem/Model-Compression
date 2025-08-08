@@ -6,7 +6,14 @@ import torch
 
 # Argument of the number of layers to remove
 num_layers_remove = int(sys.argv[1])
+if num_layers_remove > 16:
+    print("num_layers_remove must be up to 16 layers")
 print("Number of layers to remove:", num_layers_remove)
+
+# The layers_to_remove list is a result of layer-importance-evaluation.py
+all_layers_to_remove = [13, 12, 11, 16, 22, 5, 23, 9, 28, 10, 18, 26, 17, 7, 8, 15]
+layers_to_remove = all_layers_to_remove[:num_layers_remove]
+print("Layers to remove:", layers_to_remove)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print("Current device is:", device)
