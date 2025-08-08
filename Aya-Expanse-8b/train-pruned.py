@@ -23,6 +23,8 @@ dataset = load_dataset(dataset_name,
                        cache_dir=cache_dir,
                       )
 
+print(f"Loaded the dataset: {dataset_name}")
+
 prompt = f"Translate the following text from {full_src_lang} to {full_tgt_lang}:"
 train_prompts = [prompt] * dataset.num_rows
 
