@@ -16,7 +16,7 @@ full_tgt_lang = "German"
 cache_dir = "./cache"
 
 # Dataset ("ymoslem/news-commentary-cs-de") -- sentence-level data
-dataset_name = "ymoslem/news-commentary-{src_lang}-{tgt_lang.split('_')[0]}"
+dataset_name = f"ymoslem/news-commentary-{src_lang}-{tgt_lang.split('_')[0]}"
 
 dataset = load_dataset(dataset_name,
                        split="train",
