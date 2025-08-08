@@ -14,8 +14,8 @@ full_tgt_lang = "German"
 
 cache_dir = "./cache"
 
-# Dataset
-dataset_name = "ymoslem/news-commentary-cs-de"
+# Dataset ("ymoslem/news-commentary-cs-de") -- sentence-level data
+dataset_name = "ymoslem/news-commentary-{src_lang}-{tgt_lang.split('_')[0]}"
 
 dataset = load_dataset(dataset_name,
                        split="train",
@@ -40,10 +40,10 @@ print(dataset)
 
 
 # Model
-num_layers = 24 # 24, 20, 16
+num_layers = 24  # 24, 20, or 16
 device = "cuda" if torch.cuda.is_available() else "cpu"
 pretrained_model_name = "CohereLabs/aya-expanse-8b"
-model_name = f"ymoslem/Aya-Expanse-8B-De-{num_layers}Layers"
+model_name = f"ymoslem/aya-expanse-8b-{num_layers}layers-{src_lang}-{tgt_lang.split('_')[0]}"
 
 tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name,
