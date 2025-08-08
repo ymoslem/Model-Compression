@@ -2,6 +2,7 @@ from datasets import load_dataset
 from huggingface_hub import HfFolder
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, EarlyStoppingCallback
 from trl import SFTTrainer
+import json
 import torch
 
 
@@ -141,7 +142,7 @@ trainer = SFTTrainer(
     callbacks = [EarlyStoppingCallback(early_stopping_patience=5)]  # + load_best_model_at_end=True
 )
 
-print(training_arguments.to_dict())
+print(f"Training Arguments {json.dumps(training_arguments.to_dict(), indent=2)}")
 
 # Start training
 print("\nTraining...")
