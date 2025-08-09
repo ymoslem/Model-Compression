@@ -10,7 +10,7 @@ if num_layers_remove > 16:
     print("num_layers_remove must be up to 16 layers")
 print("Number of layers to remove:", num_layers_remove)
 
-# The layers_to_remove list is a result of layer-importance-evaluation.py
+# The all_layers_to_remove list is a result of layer-importance-evaluation.py
 all_layers_to_remove = [13, 12, 11, 16, 22, 5, 23, 9, 28, 10, 18, 26, 17, 7, 8, 15]
 layers_to_remove = all_layers_to_remove[:num_layers_remove]
 print("Layers to remove:", layers_to_remove)
@@ -31,19 +31,10 @@ model_parameters = sum(p.numel() for p in model.parameters())
 print(f"Original model parameters: {model_parameters:,}")
 
 # Check the currentl number of layers
-print("Original model layers:" , model.model.config.num_hidden_layers)
+current_num_layers = model.model.config.num_hidden_layers
+print("Original model layers:", current_num_layers)
 
-# The layers_to_remove list is a result of layer-importance-evaluation.py  
-if num_layers_remove == 16:
-    layers_to_remove = [9, 20, 17, 23, 16, 5, 26, 12, 11, 22, 18, 10, 19, 6, 7, 4]
-elif num_layers_remove == 12:
-    layers_to_remove = [9, 20, 17, 23, 16, 5, 26, 12, 11, 22, 18, 10]
-elif num_layers_remove == 8:
-    layers_to_remove = [9, 20, 17, 23, 16, 5, 26, 12]
-else:
-    print("Please enter a valid number of layers to remove, 8, 12, or 16")
-
-layers_to_keep = [l for l in range(32) if l not in layers_to_remove]
+layers_to_keep = [l for l in range(current_num_layers) if l not in layers_to_remove]
 
 lm_layers = model.model.layers
 
