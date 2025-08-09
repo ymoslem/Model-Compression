@@ -94,7 +94,7 @@ learning_rate = 2e-5 # or 1e-5
 
 # Output repository
 hf_id = "ymoslem/"  # change to your user name
-details = f"{int(train_num_rows/1000)}k-news-sentences"
+details = f"{int(train_num_rows/1000)}k-news-commentary-sentences"
 output_dir = f"{hf_id}wmt25-{src_lang}-{tgt_lang[:2]}-{num_layers}layers-{learning_rate}-{details}"
 
 
