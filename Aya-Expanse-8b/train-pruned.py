@@ -53,9 +53,10 @@ model = AutoModelForCausalLM.from_pretrained(model_name,
                                              torch_dtype=torch.bfloat16,
                                              use_cache=False,
                                              cache_dir=cache_dir,
-                                             ).to(device)
+                                             device_map="auto",
+                                             )
 assert model.device.type == "cuda"
-print("\nModel loaded", model_name)
+print(f"\nModel loaded on {model.device.type}: {model_name}")
 
 # Formatting function for batched processing of the data
 def formatting_prompts_func(examples):
