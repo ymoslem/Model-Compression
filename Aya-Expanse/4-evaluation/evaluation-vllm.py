@@ -165,7 +165,9 @@ with open(f"translations_{model_layers}layers.txt", "w") as output:
 
 
 # Release memory
-def release_memory():
+def release_memory(model):
+
+    del model
 
     # Force garbage collection
     gc.collect()
