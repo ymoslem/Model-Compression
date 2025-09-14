@@ -1,35 +1,57 @@
-# pip3 install vllm datasets sacrebleu unbabel-comet polars
+# Requirements: pip3 install vllm datasets sacrebleu unbabel-comet
+# Example usage: python3 inference.py deu 24
 
 from datasets import load_dataset
 from comet import download_model, load_from_checkpoint
 from sacrebleu.metrics import CHRF
 from tqdm.auto import tqdm
 from vllm import LLM, SamplingParams
+import gc
 import os
 import polars as pl
+import sys
 import torch
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+tgt_lang = sys.argv[1]  # "arz" or "deu"
+model_layers = sys.argv[2]  # 40, 32, 24, 20, or 16
+
+
 # Data
+if tgt_lang == "deu":
+    src_lang = "ces"
+    full_src_lang = "Czech"
+    full_tgt_lang = "German"
 
-# Language codes
-full_src_lang = "Czech"
-full_tgt_lang = "German"
+    dataset_name = "ymoslem/news-commentary-cs-de"
 
-dataset_name = "ymoslem/news-commentary-cs-de"
+    dataset = load_dataset(dataset_name,
+                           split="train",
+                          )
 
-dataset = load_dataset(dataset_name,
-                       split="train",
-                      )
+    dataset = dataset.shuffle(seed=0)
 
-dataset = dataset.shuffle(seed=0)
+    # Split dataset into train and test
+    dataset = dataset.train_test_split(test_size=500, seed=0)
 
-# Split dataset into train and test
-dataset = dataset.train_test_split(test_size=500, seed=0)
+    dataset = dataset["test"]
 
-dataset = dataset["test"]
+elif tgt_lang == "arz":
+    src_lang = "eng"
+    full_src_lang = "English"
+    full_tgt_lang = "Egyptian Arabic"
+
+    dataset_name = "ymoslem/news-commentary-eng-arz"
+
+    dataset = load_dataset(dataset_name,
+                           split="test",
+                          )
+    dataset = dataset.rename_columns({"english": "source", "egyptian_arabic": "target"})
+
+else:
+    raise ValueError("Invalid tgt_lang or domain.")
 
 print(dataset)
 
@@ -56,14 +78,17 @@ print(max_len)
 
 
 # Model
+if model_layers == "40":
+    model_name = "CohereLabs/aya-expanse-32b"
+elif model_layers == "32":
+    model_name = "CohereLabs/aya-expanse-8b"
+elif model_layers in ["16", "20", "24"]:
+    model_name = f"ymoslem/wmt25-{src_lang}-{tgt_lang}-{model_layers}layers-2e-5lr-news-commentary"
 
-# Baseline
-size = 8  # 8 or 32
-model_name = f"CohereLabs/aya-expanse-{size}b"
-
-# Fine-tuned models
-layers = 24  # 16, 20, 24
-# model_name = f"ymoslem/wmt25-cs-de-{layers}layers-2e-05-100k-news-commentary-sentences"
+    # or for KD models (deu only):
+    # model_name = f"ymoslem/wmt25-{src_lang}-{tgt_lang}-{model_layers}layers-2e-05-100k-news-commentary-sentences-kd"
+else:
+    print("Inaccurate configuration. Please revise the model_layers")
 
 
 num_gpus = torch.cuda.device_count()
@@ -79,19 +104,19 @@ print(f"AWQ: {awq}\n")
 
 if awq:
     llm = LLM(model=model_name,
-              #download_dir=model_directory,
-              trust_remote_code=True,
               tensor_parallel_size=num_gpus,
               quantization="awq_marlin",
               max_model_len=max_model_len,
+              trust_remote_code=True,
+              # download_dir=cache_dir,
              )
 else:
     llm = LLM(model=model_name,
-              #download_dir=model_directory,
-              trust_remote_code=True,
               dtype=torch.bfloat16,
               tensor_parallel_size=num_gpus,
               max_model_len=max_model_len,
+              trust_remote_code=True,
+              # download_dir=cache_dir,
               )
 
 
@@ -100,7 +125,7 @@ print(f"Translating {len(prompts)} prompts...")
 
 # Set up sampling parameters
 sampling_params = SamplingParams(
-                                temperature=0.0,  # Deterministic generation
+                                temperature=0.0,  # Greedy decoding
                                 max_tokens=max_len,
                                 stop_token_ids=[llm.get_tokenizer().eos_token_id],
                                 )
@@ -111,14 +136,14 @@ for prompt in tqdm(prompts, desc="Formatting prompts"):
     # Format as chat
     messages = [{"role": "user", "content": prompt}]
     formatted_prompt = llm.get_tokenizer().apply_chat_template(
-        messages, 
-        tokenize=False, 
+        messages,
+        tokenize=False,
         add_generation_prompt=True
     )
     formatted_prompts.append(formatted_prompt)
 
 # Generate all responses at once (vLLM handles batching internally)
-print("Generating responses...")
+print("\nGenerating responses...")
 batch_outputs = llm.generate(formatted_prompts, sampling_params)
 
 # Extract the generated text
@@ -127,24 +152,26 @@ for output in batch_outputs:
     generated_text = output.outputs[0].text.strip()
     translations.append(generated_text)
 
-print(f"Generated {len(translations)} responses")
+print(f"Generated {len(translations)} responses\n")
 
 
 translations[0]
 
 
-# # Optional: Save the translations to a file
-# with open("output.txt", "w") as output:
-#     for sentence in translations:
-#         output.write(sentence.strip() + "\n")
+# Optional: Save the translations to a file
+with open(f"translations_{model_layers}layers.txt", "w") as output:
+    for sentence in translations:
+        output.write(sentence.strip() + "\n")
 
 
 # Release memory
-def release_memory(model):
-    import gc
-    model = None
+def release_memory():
+
+    # Force garbage collection
     gc.collect()
-    with torch.no_grad():
+    
+    # Clear CUDA cache if available
+    if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
 release_memory(llm)
@@ -156,7 +183,6 @@ all_scores = []
 chrf = CHRF(word_order=2)
 chrf_score = round(chrf.corpus_score(translations, [references]).score, 2)
 all_scores.append(chrf_score)
-# print(chrf_score)
 
 
 # Download and load a COMET model
@@ -186,15 +212,11 @@ for comet_model_name in comet_model_names:
 
     release_memory(comet_model)
 
-    # print(comet_model_name)
-    # print(f"Corpus COMET score: {comet_corpus_score}")
 
-
+# Print results
 print(f"\nModel name: {model_name}")
-
 df = pl.DataFrame([all_scores],
                   schema=["chrF++", "COMET20", "COMET22"],
                   orient="row",
                  )
-
 print(df)
