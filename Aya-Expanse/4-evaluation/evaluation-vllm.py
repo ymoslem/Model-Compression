@@ -154,8 +154,7 @@ for output in batch_outputs:
 
 print(f"Generated {len(translations)} responses\n")
 
-
-translations[0]
+print(f"First translation: {translations[0]}")
 
 
 # Optional: Save the translations to a file
