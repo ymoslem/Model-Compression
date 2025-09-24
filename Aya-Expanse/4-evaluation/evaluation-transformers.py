@@ -1,5 +1,5 @@
 # Requirements: pip3 install datasets transformers sacrebleu unbabel-comet polars
-# Example usage: python3 inference.py deu 24
+# Example usage: python3 evaluation-transformers.py deu 24
 
 from datasets import load_dataset
 from comet import download_model, load_from_checkpoint
@@ -115,10 +115,10 @@ translations = []
 
 for i in tqdm(range(0, len(prompts), batch_size)):
     batch_prompts = prompts[i:i+batch_size]
-    
+
     # Format all messages in the batch
     batch_messages = [[{"role": "user", "content": prompt}] for prompt in batch_prompts]
-    
+
     # Tokenize the entire batch and get attention mask
     batch_inputs = tokenizer.apply_chat_template(
         batch_messages,
@@ -128,10 +128,10 @@ for i in tqdm(range(0, len(prompts), batch_size)):
         padding=True,
         return_dict=True  # This returns both input_ids and attention_mask
     )
-    
+
     input_ids = batch_inputs['input_ids'].to(device)
     attention_mask = batch_inputs['attention_mask'].to(device)
-    
+
     # Store original lengths for each sequence in the batch
     original_length = input_ids.shape[1]  # All sequences have same length due to padding
     
@@ -145,7 +145,7 @@ for i in tqdm(range(0, len(prompts), batch_size)):
             pad_token_id=tokenizer.eos_token_id,
             use_cache=True
         )
-    
+
     # Decode batch results
     for j, tokens in enumerate(gen_tokens):
         # Get the length of the original input for this specific sequence
