@@ -5,6 +5,8 @@ This repository includes the code of our two papers about iterative layer prunin
 * Iterative Layer Pruning for Efficient Translation Inference (WMT 2025)
 
 
+![pruning-digram](pruning-digram.png)
+
 
 ## Citations
 
@@ -30,13 +32,18 @@ Please cite the following papers:
 ```bib
 @inproceedings{moslem-etal-2025-iterative,
     title = "Iterative Layer Pruning for Efficient Translation Inference",
-    author = "Moslem, Yasmin and
-        Farouq, Muhammad Hazim Al and
-        Kelleher, D. John",
-    booktitle = "Proceedings of the Tenth Conference on Translation (WMT 2025)",
+    author = "Moslem, Yasmin  and
+      Al Farouq, Muhammad Hazim  and
+      Kelleher, John",
+    booktitle = "Proceedings of the Tenth Conference on Machine Translation (WMT 2025)",
     month = nov,
     year = "2025",
     address = "Suzhou, China",
     publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2025.wmt-1.78/",
+    doi = "10.18653/v1/2025.wmt-1.78",
+    pages = "1022--1027",
+    ISBN = "979-8-89176-341-8",
+    abstract = "Large language models (LLMs) have transformed many areas of natural language processing, including machine translation. However, efficient deployment of LLMs remains challenging due to their intensive computational requirements. In this paper, we address this challenge and present our submissions to the Model Compression track at the Conference on Machine Translation (WMT 2025). In our experiments, we investigate iterative layer pruning guided by layer importance analysis. We evaluate this method using the Aya-Expanse-8B model for translation from Czech to German, and from English to Egyptian Arabic. Our approach achieves substantial reductions in model size and inference time, while maintaining the translation quality of the baseline models."
 }
 ```
