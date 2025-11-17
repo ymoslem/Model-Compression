@@ -1,8 +1,8 @@
 # Model-Compression
 
 This repository includes the code of our two papers about iterative layer pruning:
-* Efficient Speech Translation through Model Compression and Knowledge Distillation (IWSLT 2025)
-* Iterative Layer Pruning for Efficient Translation Inference (WMT 2025)
+* Efficient Speech Translation through Model Compression and Knowledge Distillation ([IWSLT 2025](https://aclanthology.org/2025.iwslt-1.40/))
+* Iterative Layer Pruning for Efficient Translation Inference ([WMT 2025](https://aclanthology.org/2025.wmt-1.78/))
 
 
 ![pruning-digram](pruning-digram.png)
