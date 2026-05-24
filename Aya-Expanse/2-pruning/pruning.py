@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM
 from torch import nn
 import sys
 import torch
@@ -19,8 +19,6 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print("Current device is:", device)
 
 model_name = "CohereLabs/aya-expanse-8b"
-
-tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name,
                                              torch_dtype=torch.bfloat16,
                                              ).to(device).eval()
